@@ -1,8 +1,12 @@
 const express = require("express");
 const app = express();
 
+const postsRouter = require("./routes/posts")
 const connect = require("./schemas")
 connect();
+
+app.use(express.json());
+app.use('/api', [postsRouter])
 
 app.get('/', (req, res) => {
     res.send("hello World!")
