@@ -30,7 +30,7 @@ router.get('/posts' , async(req, res) => {
 router.get('/posts/:_postsId', async(req, res) => {
     const { _postsId } = req.params;
 
-    const post = await postSchema.findOne({ postId : _postsId })
+    const post = await postSchema.findOne({ _id : _postsId })
     
 
     const results = {

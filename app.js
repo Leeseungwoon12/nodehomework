@@ -2,11 +2,12 @@ const express = require("express");
 const app = express();
 
 const postsRouter = require("./routes/posts")
+const commentRouter = require("./routes/comments")
 const connect = require("./schemas")
 connect();
 
 app.use(express.json());
-app.use('/', [postsRouter])
+app.use('/', [postsRouter, commentRouter])
 
 // app.get('/', (req, res) => {
 //     res.send("hello World!")
