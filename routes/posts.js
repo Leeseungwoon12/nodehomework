@@ -2,7 +2,8 @@ const express = require("express");
 const router = express.Router();
 const postSchema = require("../schemas/post")
 const commentSchema = require("../schemas/comment")
-const authMiddleware = require("../middlewares/auth_middleware")
+const authMiddleware = require("../middlewares/auth_middleware");
+const comment = require('../schemas/comment');
 
 //댓글 작성api
 router.post('/posts/:postId/comments', authMiddleware,  async(req, res) => {
@@ -40,11 +41,13 @@ router.get('/posts/:postId/comments', async(req, res) => {
 });
 
 //댓글 수정 api
-router.put('/posts/:postsId/comments/:_commentId', async(req, res) => {
+router.put('/posts/:postsId/comments/:_commentId',authMiddleware, async(req, res) => {
+    const { userId } = res.locals.user;
+    const { postId } = req.params;
     const { _commentId } = req.params;
-    const { password, content} = req.body
+    const { comment } = req.body
 
-    const changecomment = await commentSchema.find({ _id : _commentId })
+    const changecomment = await commentSchema.find({ userId, _id : postId , _id : _commentId })
 
     if (!changecomment) {
         res.status(404).json({
@@ -54,29 +57,26 @@ router.put('/posts/:postsId/comments/:_commentId', async(req, res) => {
       };
 
     await commentSchema.updateOne(
-        { _id: _commentId },
-        { $set: { password: password, content: content } }
+        { userId, _id: _commentId },
+        { $set: { comment: comment} }
     )
     res.status(200).json({"message": "댓글을 수정하였습니다"});
 });
 
 //댓글 삭제 api
-router.delete('/posts/:postId/comments/:_commentId', async(req, res)=> {
+router.delete('/posts/:postId/comments/:_commentId', authMiddleware, async(req, res)=> {
+    const { userId } = res.locals.user;
     const { _commentId } = req.params;
-    const { password } = req.body;
 
-    const existcomment= await commentSchema.findOne({ _id : _commentId });
-
-    if(existcomment.password === password){
-        await commentSchema.deleteOne({ _id : _commentId });
-    }
+    const existcomment= await commentSchema.findOne({ userId, _id : _commentId });
+    await commentSchema.deleteOne({ userId, _id : _commentId });
+    
     res.json({"message" : "댓글을 삭제하였습니다."})
 });
 
 //게시글 작성 API
 router.post('/posts',authMiddleware, async(req, res) => {
     const { userId } = res.locals.user;
-    console.log(userId);
     const { title, content} = req.body
 
     await postSchema.create({ userId, title, content});
@@ -122,7 +122,7 @@ router.get('/posts/:_postsId', async(req, res) => {
 router.put('/posts/:_postsId', authMiddleware, async(req, res) => {
     const { userId } = res.locals.user;
     const { _postsId } = req.params;
-    const { password, title, content} = req.body
+    const { title, content} = req.body
 
     const post = await postSchema.find({ userId, postId : _postsId })
 
