@@ -5,7 +5,6 @@ const userSchema = require("../schemas/user")
 //회원가입 API
 router.post("/users", async (req, res) => {
     const { nickname, password, confirmPassword } = req.body;
-  
     // password 동일한지 확인
     if (password !== confirmPassword) {
       res.status(400).json({

@@ -1,16 +1,12 @@
 const mongoose = require("mongoose");
 
 const cmtSchema = new mongoose.Schema({
-    user:{
+    
+    userId:{
         type: String,
         required: true,
-        unique: true,
     },
-    password:{
-        type: String,
-        required: true,       
-    },
-    content:{
+    comment:{
         type: String,
         required: true,    
     },
