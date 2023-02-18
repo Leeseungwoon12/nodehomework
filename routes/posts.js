@@ -3,7 +3,6 @@ const router = express.Router();
 const postSchema = require("../schemas/post")
 const commentSchema = require("../schemas/comment")
 const authMiddleware = require("../middlewares/auth_middleware");
-const comment = require('../schemas/comment');
 
 //댓글 작성api
 router.post('/posts/:postId/comments', authMiddleware,  async(req, res) => {
@@ -30,8 +29,7 @@ router.get('/posts/:postId/comments', async(req, res) => {
     const results = comments.map((detail) => {
         return {
             commentId: detail._id,
-            user: detail.user,
-            content: detail.content, 
+            comment: detail.comment, 
             //작성시간 확인필요..                        
         }
     })
