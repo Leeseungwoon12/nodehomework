@@ -1,30 +1,30 @@
 const jwt = require("jsonwebtoken");
-const userSchema = require("../schemas/user");
-
+const { Users } = require("../models");
 
 module.exports = async (req, res, next) => {
-    const { Authorization }  = req.cookies; //브라우저에서 쿠키 전달 받고
-    const [ authType, authToken ] = (Authorization ?? "").split(" "); //Bearer,header.payload.signature로 분리
-
-    //쿠키로 전달받은 토큰 값 검증
-    if(authType !== "Bearer" || !authToken){
-        res.status(403).json({
-            errorMessage : "로그인 후에 이용할 수 있는 기능입니다."
-        });
-        return;
+  try {
+    const { authorization } = req.cookies;
+    const [tokenType, token] = authorization.split(" ");
+    if (tokenType !== "Bearer") {
+      return res.status(401).json({ message: "토큰 타입이 일치하지 않습니다." });
     }
 
-    try{
-        //authToken이 만료 되었는지, authToken이 서버가 발급한 토큰이 맞는지 검증
-        const {userId} = jwt.verify(authToken, "customized-secret-key" );
+    const decodedToken = jwt.verify(token, "customized_secret_key");
+    const userId = decodedToken.userId;
 
-        const user = await userSchema.findById(userId); //검증한 토큰 값으로 ID조회
-        res.locals.user = user;
-
-        next();
-    }catch(error){
-        console.error(error);
-        res.status(400).json({ errorMessage : " 로그인 후에 이용할 수 있는 기능입니다."})
-        return;
+    const user = await Users.findOne({ where: { userId } });
+    if (!user) {
+      res.clearCookie("authorization");
+      return res.status(401).json({ message: "토큰 사용자가 존재하지 않습니다." });
     }
+    res.locals.user = user;
+
+    next();
+  } catch (error) {
+    console.log(error);
+    res.clearCookie("authorization");
+    return res.status(401).json({
+      message: "비정상적인 요청입니다."
+    });
+  }
 }
