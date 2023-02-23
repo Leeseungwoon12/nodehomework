@@ -9,13 +9,12 @@ const authMiddleware = require("../middlewares/auth_middleware");
 router.post("/posts", authMiddleware, async (req, res) => {
     const { userId } = res.locals.user;
     const { title, content } = req.body;
-    console.log(userId);
     const post = await Posts.create({
         UserId: userId,
         title, content
     });
 
-    return res.status(200).json({ date: post });
+    return res.status(200).json({ data: post });
 
 });
 

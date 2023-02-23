@@ -1,35 +1,22 @@
 const express = require("express");
-const { Users, UserInfos } = require("../models");
+const { Users } = require("../models");
 const jwt = require("jsonwebtoken");
 const router = express.Router();
 
 //회원가입 API
-
-
-
-
 router.post("/users", async (req, res) => {
-  const { nickname, password, comfirm, name, age, gender } = req.body;
+  const { nickname, password, comfirm } = req.body;
   const isExistuser = await Users.findOne({ where: { nickname } });
 
   if (isExistuser) {
     return res.status(412).json({ message: "중복 된 닉네임 입니다." });
   } else if (password !== comfirm) {
     return res.status(412).json({ message: "비밀번호가 일치하지 않습니다." })
-  } else if(nickname !== !/^[a-zA-z0-9]{4,16}$/){
-    return res.status(412).json({message : "닉네임 조건을 다시 확인해주세요."})
-  } else if(password !== !/^[a-zA-z0-9]{4,16}$/ || password === nickname){
-    return res.status(412).json({message : "비밀번호 조건을 다시 확인해주세요."})
-  }
+  };
 
-  const user = await Users.create({ nickname, password })
-
-  await UserInfos.create({
-    UserId: user.userId,
-    name, age, gender
-  });
+  const user = await Users.create({ nickname, password });
   
-  res.status(201).json({message:"회원가입이 완료되었습니다."});
+  res.status(201).json({data : user});
 
 });
 
